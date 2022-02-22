@@ -1,16 +1,16 @@
 body {
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   background-color: #0c0e0a;
-  color: #FFF;
+  color: #fff;
 }
 
-table {
+/* table {
   width: 100%;
   border: 1px solid black;
   border-radius: 10px;
   border-collapse: collapse;
   border-style: hidden;
-}
+} */
 
 th:first-of-type {
   border-top-left-radius: 10px;
@@ -25,33 +25,33 @@ tr:last-of-type td:last-of-type {
   border-bottom-right-radius: 10px;
 }
 
-th {
+/* th {
   padding: 30px;
   text-align: center;
-  background-color: rgb(61, 56, 48);
+  background-color: #3d3830;
   cursor: pointer;
-}
+} */
 
-td {
+/* td {
   padding: 10px;
   text-align: center;
-}
+} */
 
-tr {
+/* tr {
   padding: 10px;
   text-align: center;
-  background-color: rgb(54, 49, 41);
-}
+  background-color: #363129;
+} */
 
 tr:hover {
-  background-color: rgb(44, 41, 35);
+  background-color: #2c2923;
 }
 
-.table-wrapper {
+/* .table-wrapper {
   border-radius: 20px;
-  margin-bottom:150px;
+  margin-bottom: 150px;
   border: 1px solid #0c0e0a;
-}
+} */
 
 .logo {
   max-width: 450px;
@@ -80,7 +80,7 @@ tr:hover {
     display: inline-block !important;
   }
 
-  table thead {
+  /* table thead {
     border: none;
     clip: rect(0 0 0 0);
     height: 1px;
@@ -89,16 +89,16 @@ tr:hover {
     padding: 0;
     position: absolute;
     width: 1px;
-  }
+  } */
 
   table tr {
     display: block;
-    margin-bottom: .625em;
+    margin-bottom: 0.625em;
   }
 
   table td {
     display: block;
-    font-size: .8em;
+    font-size: 0.8em;
     text-align: right !important;
   }
 
@@ -123,11 +123,11 @@ tr:hover {
 }
 
 a {
-  color: #FFF;
+  color: #fff;
   text-decoration: none;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
