@@ -1,7 +1,7 @@
 import "./App.css";
 import React, { useState } from "react";
 
-import LeaderboardTable from "./LeaderboardTableV2.js";
+import LeaderboardTable from "./LeaderboardTable.js";
 import Footer from "./Footer";
 import { ThemeProvider } from "@mui/styles";
 import AppTheme from "./Theme";
