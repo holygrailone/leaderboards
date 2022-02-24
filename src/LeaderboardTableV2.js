@@ -25,6 +25,7 @@ const tableHeaders = [
   { label: "Level", id: "level", numeric: true },
   { label: "XP", id: "xp", numeric: true },
   { label: "Name", id: "name", numeric: false },
+  { label: "Class", id: "class", numeric: false },
   { label: "Title", id: "title", numeric: false },
   { label: "Gold", id: "gold", numeric: true },
   { label: "Knowledge", id: "knowledge", numeric: true },
@@ -108,7 +109,7 @@ const SortableTableHead = (props) => {
         {tableHeaders.map((th) => {
           const orderByHeader = orderBy === th.id;
           const textAlignment =
-            th.id === "Rank" ? "center" : th.numeric ? "right" : "left";
+            th.id === "rank" ? "center" : th.numeric ? "right" : "left";
 
           return (
             <TableCell
@@ -152,7 +153,13 @@ export default function LeaderboardTable() {
       })
       .then((res) => {
         var newLegends = res.data
-          .sort((a, b) => b.level - a.level)
+          .sort((a, b) => {
+            if (a.level === b.level) {
+              // exp only important when level are the same
+              return b.exp - a.exp;
+            }
+            return a.level > b.level ? -1 : 1;
+          })
           .map((l, idx) => {
             return { ...l, rank: idx + 1 };
           });
@@ -253,6 +260,10 @@ export default function LeaderboardTable() {
                       }`}
                     </StyledTableCell>
                   </Tooltip>
+
+                  <StyledTableCell legends-label="Title">
+                    {legend.class}
+                  </StyledTableCell>
 
                   <StyledTableCell legends-label="Title">
                     {legend.title}
