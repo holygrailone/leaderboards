@@ -127,6 +127,18 @@ const SortableTableHead = (props) => {
                 active={orderByHeader}
                 direction={orderByHeader ? order : "asc"}
                 onClick={createSortHandler(th.id)}
+                // colouring from https://stackoverflow.com/a/70180424
+                sx={{
+                  "&.MuiTableSortLabel-root:hover": {
+                    color: "#f59e1d",
+                  },
+                  "&.Mui-active": {
+                    color: "#f59e1d",
+                  },
+                  "& .MuiTableSortLabel-icon": {
+                    color: "#f59e1d !important",
+                  },
+                }}
               >
                 {th.label}
               </TableSortLabel>
