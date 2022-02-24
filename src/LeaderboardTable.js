@@ -10,13 +10,12 @@ import {
   TableCell,
   Tooltip,
   TableSortLabel,
-  TablePagination,
+  Pagination,
   Paper,
 } from "@mui/material";
-import { makeStyles, createStyles } from "@mui/styles";
+import { makeStyles, createStyles, useTheme } from "@mui/styles";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import goldMedal from "./assets/goldmedal.png";
-import { styled } from "@mui/material/styles";
 
 const tableHeaders = [
   { label: "Rank", id: "rank", numeric: true },
@@ -37,43 +36,52 @@ const tableHeaders = [
 const iconSize = 30;
 const tableCellPadding = 12;
 
-const useStyles = makeStyles(() =>
+const useLocalStyles = makeStyles((theme) =>
   createStyles({
+    root: {
+      width: "80%",
+      margin: "auto",
+      textAlign: "center",
+      color: "white",
+      backgroundColor: theme.palette.background.main,
+    },
+    tableContainerPaper: {
+      "&.MuiPaper-root": {
+        backgroundColor: theme.palette.background.main,
+        borderRadius: 0,
+      },
+    },
     goldStarIcon: {
       width: iconSize,
       height: iconSize,
       verticalAlign: "middle",
     },
-    tableContainer: {
-      width: "80%",
-      margin: "auto",
-    },
     tableHeader: {
       padding: 30,
-      textAlign: "center",
-      backgroundColor: "#3d3830",
       cursor: "pointer",
     },
     tableRow: {
       padding: 10,
-      textAlign: "center",
-      backgroundColor: "#363129",
+    },
+    footer: {
+      padding: 12,
+    },
+    paginationStyle: {
+      "& .MuiPaginationItem-root.Mui-selected": {
+        backgroundColor: theme.palette.primary.main,
+      },
+      "& .MuiPaginationItem-root": {
+        color: "white",
+      },
+      justifyContent: "center",
     },
   })
 );
-
-const StyledPaper = styled(Paper)(() => ({
-  width: "80%",
-  margin: "auto",
-  textAlign: "center",
-  backgroundColor: "#363129",
-}));
 
 const baseCellStyle = {
   color: "white",
   whiteSpace: "nowrap",
   padding: tableCellPadding,
-  verticalAlign: "middle",
 };
 
 const StyledTableCell = (props) => {
@@ -97,7 +105,8 @@ const StyledTableCell = (props) => {
 };
 
 const SortableTableHead = (props) => {
-  const classes = useStyles();
+  const classes = useLocalStyles();
+  const theme = useTheme();
   const { order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
@@ -130,13 +139,13 @@ const SortableTableHead = (props) => {
                 // colouring from https://stackoverflow.com/a/70180424
                 sx={{
                   "&.MuiTableSortLabel-root:hover": {
-                    color: "#f59e1d",
+                    color: theme.palette.primary.main,
                   },
                   "&.Mui-active": {
-                    color: "#f59e1d",
+                    color: theme.palette.primary.main,
                   },
                   "& .MuiTableSortLabel-icon": {
-                    color: "#f59e1d !important",
+                    color: `${theme.palette.primary.main} !important`,
                   },
                 }}
               >
@@ -150,8 +159,9 @@ const SortableTableHead = (props) => {
   );
 };
 
-export default function LeaderboardTable() {
-  const classes = useStyles();
+export default function LeaderboardTable(props) {
+  const { setNumLegends } = props;
+  const classes = useLocalStyles();
 
   // fetch legends data
   const [legends, setLegends] = useState([]);
@@ -166,16 +176,22 @@ export default function LeaderboardTable() {
       .then((res) => {
         var newLegends = res.data
           .sort((a, b) => {
+            // sort order: level / exp / mint number
             if (a.level === b.level) {
               // exp only important when level are the same
+              // return a.exp > b.exp ? -1 : 1;
+              if (a.exp === b.exp) {
+                return b.legendid - a.legendid;
+              }
               return b.exp - a.exp;
             }
-            return a.level > b.level ? -1 : 1;
+            return b.level - a.level;
           })
           .map((l, idx) => {
             return { ...l, rank: idx + 1 };
           });
         setLegends(newLegends);
+        setNumLegends(newLegends.length);
       });
   }, []);
 
@@ -205,21 +221,15 @@ export default function LeaderboardTable() {
   };
 
   // pagination
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
+  const [page, setPage] = React.useState(1);
+  const rowsPerPage = 10;
   const handleChangePage = (_, newPage) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
   return (
-    <StyledPaper>
-      <TableContainer>
+    <div className={classes.root}>
+      <TableContainer component={Paper} className={classes.tableContainerPaper}>
         <Table>
           <SortableTableHead
             order={order}
@@ -230,14 +240,14 @@ export default function LeaderboardTable() {
           <TableBody>
             {legends
               .sort(getComparator(order, orderBy))
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .slice((page - 1) * rowsPerPage, page * rowsPerPage)
               .map((legend, index) => (
                 <TableRow
                   key={index}
                   legends-item={legend}
                   className={classes.tableRow}
                 >
-                  <StyledTableCell legends-label="Rank" rank>
+                  <StyledTableCell rank>
                     {legend.rank === 1 ? (
                       <img
                         src={goldMedal}
@@ -249,57 +259,39 @@ export default function LeaderboardTable() {
                     )}
                   </StyledTableCell>
 
-                  <StyledTableCell legends-label="Legend #" numeric>
-                    {legend.legendid}
-                  </StyledTableCell>
+                  <StyledTableCell numeric>{legend.legendid}</StyledTableCell>
 
-                  <StyledTableCell legends-label="Gen" numeric>
-                    {legend.gen}
-                  </StyledTableCell>
+                  <StyledTableCell numeric>{legend.gen}</StyledTableCell>
 
-                  <StyledTableCell legends-label="Level" numeric>
-                    {legend.level}
-                  </StyledTableCell>
+                  <StyledTableCell numeric>{legend.level}</StyledTableCell>
 
-                  <StyledTableCell legends-label="XP" numeric>
-                    {legend.xp}
-                  </StyledTableCell>
+                  <StyledTableCell numeric>{legend.xp}</StyledTableCell>
 
                   <Tooltip title={legend.name} placement="right-start">
-                    <StyledTableCell legends-label="Name">
+                    <StyledTableCell>
                       {`${legend.name.substring(0, 20)}${
                         legend.name.length > 20 ? "..." : ""
                       }`}
                     </StyledTableCell>
                   </Tooltip>
 
-                  <StyledTableCell legends-label="Title">
-                    {legend.class}
-                  </StyledTableCell>
+                  <StyledTableCell>{legend.class}</StyledTableCell>
 
-                  <StyledTableCell legends-label="Title">
-                    {legend.title}
-                  </StyledTableCell>
+                  <StyledTableCell>{legend.title}</StyledTableCell>
 
-                  <StyledTableCell legends-label="Gold" numeric>
-                    {legend.gold}
-                  </StyledTableCell>
+                  <StyledTableCell numeric>{legend.gold}</StyledTableCell>
 
-                  <StyledTableCell legends-label="Knowledge" numeric>
-                    {legend.knowledge}
-                  </StyledTableCell>
+                  <StyledTableCell numeric>{legend.knowledge}</StyledTableCell>
 
-                  <StyledTableCell legends-label="Minted" numeric>
+                  <StyledTableCell numeric>
                     {new Date(legend.minted * 1000)
                       .toLocaleDateString("en-US")
                       .toString()}
                   </StyledTableCell>
 
-                  <StyledTableCell legends-label="Banned">
-                    {legend.banned.toString()}
-                  </StyledTableCell>
+                  <StyledTableCell>{legend.banned.toString()}</StyledTableCell>
 
-                  <StyledTableCell legends-label="Owner">
+                  <StyledTableCell>
                     <div
                       style={{
                         display: "inline-flex",
@@ -321,16 +313,18 @@ export default function LeaderboardTable() {
         </Table>
       </TableContainer>
 
-      <TablePagination
-        rowsPerPageOptions={[10, 20, 50]}
-        component="div"
-        count={legends.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        style={{ color: "white" }}
+      <Pagination
+        count={Math.ceil(legends.length / rowsPerPage)}
+        onChange={handleChangePage}
+        variant="outlined"
+        shape="rounded"
+        className={classes.footer}
+        classes={{
+          ul: classes.paginationStyle,
+        }}
+        showFirstButton
+        showLastButton
       />
-    </StyledPaper>
+    </div>
   );
 }
