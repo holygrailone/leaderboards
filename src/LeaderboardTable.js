@@ -176,14 +176,14 @@ export default function LeaderboardTable(props) {
       .then((res) => {
         var newLegends = res.data
           .sort((a, b) => {
-            // sort order: level / exp / mint number
+            // sort order: level / xp / mint number (legendid)
             if (a.level === b.level) {
-              // exp only important when level are the same
-              // return a.exp > b.exp ? -1 : 1;
-              if (a.exp === b.exp) {
+              // xp only important when level are the same
+              // return a.xp > b.xp ? -1 : 1;
+              if (a.xp === b.xp) {
                 return b.legendid - a.legendid;
               }
-              return b.exp - a.exp;
+              return b.xp - a.xp;
             }
             return b.level - a.level;
           })
@@ -193,7 +193,7 @@ export default function LeaderboardTable(props) {
         setLegends(newLegends);
         setNumLegends(newLegends.length);
       });
-  }, []);
+  }, [setNumLegends]);
 
   // sorting
   const [order, setOrder] = React.useState("asc");
@@ -268,11 +268,12 @@ export default function LeaderboardTable(props) {
                   <StyledTableCell numeric>{legend.xp}</StyledTableCell>
 
                   <Tooltip title={legend.name} placement="right-start">
-                    <StyledTableCell>
+                    {/* not using StyledTableCell inside Tooltip bc of https://stackoverflow.com/questions/67627038/react-forward-ref-not-working-as-with-custom-compoent */}
+                    <TableCell style={{ ...baseCellStyle }}>
                       {`${legend.name.substring(0, 20)}${
                         legend.name.length > 20 ? "..." : ""
                       }`}
-                    </StyledTableCell>
+                    </TableCell>
                   </Tooltip>
 
                   <StyledTableCell>{legend.class}</StyledTableCell>
