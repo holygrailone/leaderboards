@@ -1,16 +1,35 @@
 import "./App.css";
 import React, { useState } from "react";
-
 import LeaderboardTable from "./LeaderboardTable.js";
 import Footer from "./Footer";
-import { ThemeProvider } from "@mui/styles";
 import AppTheme from "./Theme";
+import clsx from "clsx";
+import { ThemeProvider, makeStyles, createStyles } from "@mui/styles";
+
+const useLocalStyles = makeStyles(() =>
+  createStyles({
+    app: {
+      display: "grid",
+      gridTemplateRows: "max-content 1fr max-content",
+      gridGap: 8,
+
+      // used to prevent vertical / horizontal scrollbars
+      position: "absolute",
+      top: 0,
+      height: "100%",
+      left: 0,
+      width: "100%",
+    },
+  })
+);
 
 function App() {
   const [numLegends, setNumLegends] = useState(0);
+  const classes = useLocalStyles();
+
   return (
     <ThemeProvider theme={AppTheme}>
-      <div className="App">
+      <div className={clsx("App", classes.app)}>
         <header style={{ marginTop: "55px" }}>
           <img
             src="https://holygrail.one/holygrailonegame.png"
@@ -19,17 +38,15 @@ function App() {
           />
           <h1>Leaderboards</h1>
           <p>
-            These Holy Grail Leaderboards refresh statistics every ~30 minutes.
+            {`${
+              numLegends > 0 ? `Legends Minted: ${numLegends} | ` : null
+            }Leaderboard refreshes every ~30 minutes`}
           </p>
-          {numLegends > 0 ? <p>Legends Minted: {numLegends}</p> : null}
-          <br />
         </header>
+
         <LeaderboardTable setNumLegends={setNumLegends} />
 
-        <div style={{ height: 70 }} />
-
         <Footer />
-        <div className="App-body" />
       </div>
     </ThemeProvider>
   );
