@@ -1,4 +1,3 @@
-// import "./App.css";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -24,8 +23,8 @@ const tableHeaders = [
   { label: "Level", id: "level", numeric: true },
   { label: "XP", id: "xp", numeric: true },
   { label: "Name", id: "name", numeric: false },
-  { label: "Class", id: "class", numeric: false },
   { label: "Title", id: "title", numeric: false },
+  { label: "Class", id: "class", numeric: false },
   { label: "Gold", id: "gold", numeric: true },
   { label: "Knowledge", id: "knowledge", numeric: true },
   { label: "Minted", id: "minted", numeric: true },
@@ -39,7 +38,7 @@ const tableCellPadding = 12;
 const useLocalStyles = makeStyles((theme) =>
   createStyles({
     root: {
-      width: "80%",
+      width: "90vw",
       margin: "auto",
       textAlign: "center",
       color: "white",
@@ -176,7 +175,7 @@ export default function LeaderboardTable(props) {
       .then((res) => {
         var newLegends = res.data
           .sort((a, b) => {
-            // sort order: level / xp / mint number (legendid)
+            // sort order: level / xp / mint number (legendid a.k.a time minted: earlier first)
             if (a.level === b.level) {
               // xp only important when level are the same
               // return a.xp > b.xp ? -1 : 1;
@@ -276,9 +275,9 @@ export default function LeaderboardTable(props) {
                     </TableCell>
                   </Tooltip>
 
-                  <StyledTableCell>{legend.class}</StyledTableCell>
-
                   <StyledTableCell>{legend.title}</StyledTableCell>
+
+                  <StyledTableCell>{legend.class}</StyledTableCell>
 
                   <StyledTableCell numeric>{legend.gold}</StyledTableCell>
 
