@@ -11,10 +11,16 @@ import {
   TableSortLabel,
   Pagination,
   Paper,
+  Toolbar,
+  IconButton,
+  InputAdornment,
+  TextField,
 } from "@mui/material";
-import { makeStyles, createStyles, useTheme } from "@mui/styles";
+import { makeStyles, createStyles, useTheme, styled } from "@mui/styles";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import goldMedal from "./assets/goldmedal.png";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import SearchIcon from "@mui/icons-material/Search";
 
 const tableHeaders = [
   { label: "Rank", id: "rank", numeric: true },
@@ -37,6 +43,7 @@ const tableCellPadding = 12;
 
 const useLocalStyles = makeStyles((theme) =>
   createStyles({
+    primaryColor: { color: theme.palette.primary.main },
     root: {
       width: "90vw",
       margin: "auto",
@@ -73,6 +80,14 @@ const useLocalStyles = makeStyles((theme) =>
         color: "white",
       },
       justifyContent: "center",
+    },
+    toolbar: {
+      borderBottom: "1px solid white",
+      justifyContent: "space-between",
+    },
+    textfieldPrimaryColor: {
+      borderWidth: 1,
+      borderColor: theme.palette.primary.main,
     },
   })
 );
@@ -158,9 +173,70 @@ const SortableTableHead = (props) => {
   );
 };
 
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+    "&:hover fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: theme.palette.primary.main,
+    },
+  },
+}));
+
+const EnhancedTableToolbar = (props) => {
+  const { filterText, handleFilterTextChange } = props;
+  const theme = useTheme();
+  const classes = useLocalStyles();
+
+  return (
+    <Toolbar className={classes.toolbar}>
+      <Tooltip title="Search Name or Owner Address">
+        <StyledTextField
+          variant="outlined"
+          size="small"
+          value={filterText}
+          onChange={handleFilterTextChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon className={classes.primaryColor} />
+              </InputAdornment>
+            ),
+          }}
+          inputProps={{ style: { color: theme.palette.primary.main } }}
+        />
+      </Tooltip>
+
+      {/* FILTER WIP
+      <Tooltip title="Filter">
+        <IconButton>
+          <FilterListIcon className={classes.primaryColor} />
+        </IconButton>
+      </Tooltip> */}
+    </Toolbar>
+  );
+};
+
 export default function LeaderboardTable(props) {
   const { setNumLegends } = props;
   const classes = useLocalStyles();
+
+  // pagination
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+  const handleChangePage = (_, newPage) => {
+    setPage(newPage);
+  };
+
+  // text filter
+  const [filterText, setFilterText] = useState("");
+  const handleFilterTextChange = (e) => {
+    setFilterText(e.target.value);
+  };
 
   // fetch legends data
   const [legends, setLegends] = useState([]);
@@ -194,6 +270,12 @@ export default function LeaderboardTable(props) {
       });
   }, [setNumLegends]);
 
+  const filteredLegends = legends.filter(
+    (l) =>
+      l.name.toLowerCase().includes(filterText.toLowerCase()) ||
+      l.address.toLowerCase().includes(filterText.toLowerCase())
+  );
+
   // sorting
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState(tableHeaders[0].id);
@@ -219,15 +301,13 @@ export default function LeaderboardTable(props) {
       : (a, b) => -descendingComparator(a, b, orderBy);
   };
 
-  // pagination
-  const [page, setPage] = React.useState(1);
-  const rowsPerPage = 10;
-  const handleChangePage = (_, newPage) => {
-    setPage(newPage);
-  };
-
   return (
     <div className={classes.root}>
+      <EnhancedTableToolbar
+        filterText={filterText}
+        handleFilterTextChange={handleFilterTextChange}
+      />
+
       <TableContainer component={Paper} className={classes.tableContainerPaper}>
         <Table>
           <SortableTableHead
@@ -237,15 +317,11 @@ export default function LeaderboardTable(props) {
           />
 
           <TableBody>
-            {legends
+            {filteredLegends
               .sort(getComparator(order, orderBy))
               .slice((page - 1) * rowsPerPage, page * rowsPerPage)
               .map((legend, index) => (
-                <TableRow
-                  key={index}
-                  legends-item={legend}
-                  className={classes.tableRow}
-                >
+                <TableRow key={index} className={classes.tableRow}>
                   <StyledTableCell rank>
                     {legend.rank === 1 ? (
                       <img
@@ -291,22 +367,26 @@ export default function LeaderboardTable(props) {
 
                   <StyledTableCell>{legend.banned.toString()}</StyledTableCell>
 
-                  <StyledTableCell>
-                    <div
-                      style={{
-                        display: "inline-flex",
-                        verticalAlign: "middle",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Jazzicon
-                        diameter={iconSize}
-                        seed={jsNumberForAddress(legend.address)}
-                      />
-                      <div style={{ width: 10 }} />
-                      {legend.address.substring(0, 15) + "..."}
-                    </div>
-                  </StyledTableCell>
+                  <Tooltip title={legend.address} placement="right-start">
+                    {/* not using StyledTableCell inside Tooltip bc of https://stackoverflow.com/questions/67627038/react-forward-ref-not-working-as-with-custom-compoent */}
+                    <TableCell>
+                      <div
+                        style={{
+                          color: "white",
+                          display: "inline-flex",
+                          verticalAlign: "middle",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Jazzicon
+                          diameter={iconSize}
+                          seed={jsNumberForAddress(legend.address)}
+                        />
+                        <div style={{ width: 10 }} />
+                        {legend.address.substring(0, 15) + "..."}
+                      </div>
+                    </TableCell>
+                  </Tooltip>
                 </TableRow>
               ))}
           </TableBody>
@@ -314,7 +394,7 @@ export default function LeaderboardTable(props) {
       </TableContainer>
 
       <Pagination
-        count={Math.ceil(legends.length / rowsPerPage)}
+        count={Math.ceil(filteredLegends.length / rowsPerPage)}
         onChange={handleChangePage}
         variant="outlined"
         shape="rounded"

@@ -7,15 +7,23 @@ import telegramIcon from "./assets/telegram.png";
 import githubIcon from "./assets/github.png";
 import voteIcon from "./assets/vote.png";
 import rugdocIcon from "./assets/rugdoc.png";
+import { useTheme } from "@mui/styles";
+import { makeStyles, createStyles } from "@mui/styles";
 
-const imgStyle = {
-  width: 25,
-  height: 25,
-};
+const useLocalStyles = makeStyles((theme) =>
+  createStyles({
+    imgStyle: {
+      width: 25,
+      height: 25,
+    },
+  })
+);
 
 const spaceBetweenIcons = 35;
 
 export default function Footer() {
+  const classes = useLocalStyles();
+
   return (
     <div
       style={{
@@ -27,7 +35,7 @@ export default function Footer() {
       }}
     >
       <a href="https://swap.holygrail.one" target="_blank" rel="noreferrer">
-        <img src={swapIcon} style={imgStyle} alt="Swap" />
+        <img src={swapIcon} className={classes.imgStyle} alt="Swap" />
       </a>
 
       <a
@@ -35,11 +43,11 @@ export default function Footer() {
         target="_blank"
         rel="noreferrer"
       >
-        <img src={twitterIcon} style={imgStyle} alt="Twitter" />
+        <img src={twitterIcon} className={classes.imgStyle} alt="Twitter" />
       </a>
 
       <a href="https://discord.gg/a5EkZtB9Fx" target="_blank" rel="noreferrer">
-        <img src={discordIcon} style={imgStyle} alt="Discord" />
+        <img src={discordIcon} className={classes.imgStyle} alt="Discord" />
       </a>
 
       <a
@@ -47,11 +55,11 @@ export default function Footer() {
         target="_blank"
         rel="noreferrer"
       >
-        <img src={mediumIcon} style={imgStyle} alt="Medium" />
+        <img src={mediumIcon} className={classes.imgStyle} alt="Medium" />
       </a>
 
       <a href="https://t.me/holygrailone" target="_blank" rel="noreferrer">
-        <img src={telegramIcon} style={imgStyle} alt="Telegram" />
+        <img src={telegramIcon} className={classes.imgStyle} alt="Telegram" />
       </a>
 
       <a
@@ -59,11 +67,11 @@ export default function Footer() {
         target="_blank"
         rel="noreferrer"
       >
-        <img src={githubIcon} style={imgStyle} alt="Github" />
+        <img src={githubIcon} className={classes.imgStyle} alt="Github" />
       </a>
 
       <a href="https://vote.holygrail.one" target="_blank" rel="noreferrer">
-        <img src={voteIcon} style={imgStyle} alt="Vote" />
+        <img src={voteIcon} className={classes.imgStyle} alt="Vote" />
       </a>
 
       <a
@@ -71,7 +79,7 @@ export default function Footer() {
         target="_blank"
         rel="noreferrer"
       >
-        <img src={rugdocIcon} style={imgStyle} alt="Rugdoc" />
+        <img src={rugdocIcon} className={classes.imgStyle} alt="Rugdoc" />
       </a>
     </div>
   );
