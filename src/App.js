@@ -11,7 +11,7 @@ const useLocalStyles = makeStyles(() =>
     app: {
       display: "grid",
       gridTemplateRows: "max-content 1fr max-content",
-      gridGap: 8,
+      gridGap: 20,
 
       // used to prevent vertical / horizontal scrollbars
       position: "absolute",
@@ -30,7 +30,7 @@ function App() {
   return (
     <ThemeProvider theme={AppTheme}>
       <div className={clsx("App", classes.app)}>
-        <header style={{ marginTop: "55px" }}>
+        <header style={{ marginTop: "40px" }}>
           <img
             src="https://holygrail.one/holygrailonegame.png"
             alt="Holy Grail"
@@ -39,7 +39,7 @@ function App() {
           <h1>Leaderboards</h1>
           <p>
             {`${
-              numLegends > 0 ? `Legends Minted: ${numLegends} | ` : null
+              numLegends > 0 ? `Legends Minted: ${numLegends} | ` : ""
             }Leaderboard refreshes every ~30 minutes`}
           </p>
         </header>

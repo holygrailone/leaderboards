@@ -50,6 +50,11 @@ const useLocalStyles = makeStyles((theme) =>
       textAlign: "center",
       color: "white",
       backgroundColor: theme.palette.background.main,
+      marginTop: 0,
+      marginBottom: 0,
+      display: "grid",
+      gridTemplateRows: "max-content 1fr max-content",
+      alignItems: "start",
     },
     tableContainerPaper: {
       "&.MuiPaper-root": {
@@ -70,7 +75,9 @@ const useLocalStyles = makeStyles((theme) =>
       padding: 10,
     },
     footer: {
+      border: "none",
       padding: 12,
+      // transform: "translateY(-75%)",
     },
     paginationStyle: {
       "& .MuiPaginationItem-root.Mui-selected": {
@@ -253,10 +260,8 @@ export default function LeaderboardTable(props) {
           .sort((a, b) => {
             // sort order: level / xp / mint number (legendid a.k.a time minted: earlier first)
             if (a.level === b.level) {
-              // xp only important when level are the same
-              // return a.xp > b.xp ? -1 : 1;
               if (a.xp === b.xp) {
-                return b.legendid - a.legendid;
+                return a.legendid - b.legendid;
               }
               return b.xp - a.xp;
             }
