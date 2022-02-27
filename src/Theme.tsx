@@ -6,7 +6,7 @@ const AppTheme = createTheme({
       main: "#f59e1d",
     },
     background: {
-      main: "#3d3830",
+      default: "#3d3830",
     },
     tonalOffset: 0.5,
   },

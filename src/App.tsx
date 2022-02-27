@@ -1,7 +1,7 @@
 import "./App.css";
 import React, { useState } from "react";
-import LeaderboardTable from "./LeaderboardTable.js";
-import Footer from "./Footer";
+import LeaderboardTable from "./components/LeaderboardTable";
+import Footer from "./components/Footer";
 import AppTheme from "./Theme";
 import clsx from "clsx";
 import { ThemeProvider, makeStyles, createStyles } from "@mui/styles";
@@ -24,7 +24,7 @@ const useLocalStyles = makeStyles(() =>
 );
 
 function App() {
-  const [numLegends, setNumLegends] = useState(0);
+  const [numLegends, setNumLegends] = useState<number>(0);
   const classes = useLocalStyles();
 
   return (

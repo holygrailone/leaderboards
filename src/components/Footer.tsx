@@ -1,16 +1,15 @@
 import React from "react";
-import swapIcon from "./assets/swap.png";
-import twitterIcon from "./assets/twitter.png";
-import discordIcon from "./assets/discord.png";
-import mediumIcon from "./assets/medium.png";
-import telegramIcon from "./assets/telegram.png";
-import githubIcon from "./assets/github.png";
-import voteIcon from "./assets/vote.png";
-import rugdocIcon from "./assets/rugdoc.png";
-import { useTheme } from "@mui/styles";
+import swapIcon from "../assets/swap.png";
+import twitterIcon from "../assets/twitter.png";
+import discordIcon from "../assets/discord.png";
+import mediumIcon from "../assets/medium.png";
+import telegramIcon from "../assets/telegram.png";
+import githubIcon from "../assets/github.png";
+import voteIcon from "../assets/vote.png";
+import rugdocIcon from "../assets/rugdoc.png";
 import { makeStyles, createStyles } from "@mui/styles";
 
-const useLocalStyles = makeStyles((theme) =>
+const useLocalStyles = makeStyles(() =>
   createStyles({
     footer: {
       display: "grid",
