@@ -2,7 +2,8 @@
   "compilerOptions": {
     "incremental": true,
     "outDir": "build/lib",
-    "target": "es5",
+    "target": "es2015",
+    "downlevelIteration": true,
     "module": "esnext",
     "lib": ["DOM", "ESNext"],
     "sourceMap": true,

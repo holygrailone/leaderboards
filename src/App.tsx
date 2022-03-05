@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import AppTheme from "./Theme";
 import clsx from "clsx";
 import { ThemeProvider, makeStyles, createStyles } from "@mui/styles";
+import { StoreProvider } from "store/Store";
 
 const useLocalStyles = makeStyles(() =>
   createStyles({
@@ -29,25 +30,27 @@ function App() {
 
   return (
     <ThemeProvider theme={AppTheme}>
-      <div className={clsx("App", classes.app)}>
-        <header style={{ marginTop: "40px" }}>
-          <img
-            src="https://holygrail.one/holygrailonegame.png"
-            alt="Holy Grail"
-            className="logo"
-          />
-          <h1>Leaderboards</h1>
-          <p>
-            {`${
-              numLegends > 0 ? `Legends Minted: ${numLegends} | ` : ""
-            }Leaderboard refreshes every ~30 minutes`}
-          </p>
-        </header>
+      <StoreProvider>
+        <div className={clsx("App", classes.app)}>
+          <header style={{ marginTop: "40px" }}>
+            <img
+              src="https://holygrail.one/holygrailonegame.png"
+              alt="Holy Grail"
+              className="logo"
+            />
+            <h1>Leaderboards</h1>
+            <p>
+              {`${
+                numLegends > 0 ? `Legends Minted: ${numLegends} | ` : ""
+              }Leaderboard refreshes every ~30 minutes`}
+            </p>
+          </header>
 
-        <LeaderboardTable setNumLegends={setNumLegends} />
+          <LeaderboardTable setNumLegends={setNumLegends} />
 
-        <Footer />
-      </div>
+          <Footer />
+        </div>
+      </StoreProvider>
     </ThemeProvider>
   );
 }

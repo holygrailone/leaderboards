@@ -33,31 +33,9 @@ import goldMedal from "../assets/goldmedal.png";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterDialog from "./FilterDialog";
+import { useStore } from "store/Store";
 
 type OrderType = "asc" | "desc";
-
-type LegendClass = "Crusader" | "Magist" | "Ranger";
-interface LegendData {
-  rank: number;
-  legendid: number;
-  address: string;
-  gen: number;
-  title: string;
-  minted: number;
-  banned: boolean;
-  knowledge: number;
-  name: string;
-  class: LegendClass;
-  level: number;
-  xp: number;
-  gold: number;
-}
-
-interface LegendLabelData {
-  label: string;
-  id: keyof LegendData;
-  numeric: boolean;
-}
 
 const tableHeaders: LegendLabelData[] = [
   { label: "Rank", id: "rank", numeric: true },
@@ -297,6 +275,7 @@ interface LeaderboardTableProps {
 const LeaderboardTable = (props: LeaderboardTableProps) => {
   const { setNumLegends } = props;
   const classes = useLocalStyles();
+  const { dispatch } = useStore();
 
   // pagination
   const [page, setPage] = useState(1);
@@ -347,8 +326,14 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
           });
         setLegends(newLegends);
         setNumLegends(newLegends.length);
+        dispatch({
+          type: "UPDATE_LEGENDS_DATA",
+          payload: {
+            legendsData: newLegends,
+          },
+        });
       });
-  }, [setNumLegends]);
+  }, [dispatch, setNumLegends]);
 
   const filteredLegends = legends.filter(
     (l) =>
