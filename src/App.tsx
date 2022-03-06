@@ -4,7 +4,8 @@ import LeaderboardTable from "./components/LeaderboardTable";
 import Footer from "./components/Footer";
 import AppTheme from "./Theme";
 import clsx from "clsx";
-import { ThemeProvider, makeStyles, createStyles } from "@mui/styles";
+import { ThemeProvider } from "@mui/material/styles";
+import { makeStyles, createStyles } from "@mui/styles";
 import { StoreProvider } from "store/Store";
 
 const useLocalStyles = makeStyles(() =>
