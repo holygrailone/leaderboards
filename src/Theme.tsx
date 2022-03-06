@@ -1,4 +1,4 @@
-import { createTheme } from "@mui/material";
+import { createTheme } from "@mui/material/styles";
 
 const AppTheme = createTheme({
   palette: {
@@ -6,10 +6,11 @@ const AppTheme = createTheme({
       main: "#f59e1d",
     },
     background: {
-      main: "#3d3830",
+      default: "#3d3830",
     },
     tonalOffset: 0.5,
   },
+  spacing: 8,
 });
 
 export default AppTheme;

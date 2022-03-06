@@ -1,17 +1,24 @@
 import React from "react";
-import swapIcon from "./assets/swap.png";
-import twitterIcon from "./assets/twitter.png";
-import discordIcon from "./assets/discord.png";
-import mediumIcon from "./assets/medium.png";
-import telegramIcon from "./assets/telegram.png";
-import githubIcon from "./assets/github.png";
-import voteIcon from "./assets/vote.png";
-import rugdocIcon from "./assets/rugdoc.png";
-import { useTheme } from "@mui/styles";
+import swapIcon from "../assets/swap.png";
+import twitterIcon from "../assets/twitter.png";
+import discordIcon from "../assets/discord.png";
+import mediumIcon from "../assets/medium.png";
+import telegramIcon from "../assets/telegram.png";
+import githubIcon from "../assets/github.png";
+import voteIcon from "../assets/vote.png";
+import rugdocIcon from "../assets/rugdoc.png";
 import { makeStyles, createStyles } from "@mui/styles";
 
-const useLocalStyles = makeStyles((theme) =>
+const useLocalStyles = makeStyles(() =>
   createStyles({
+    footer: {
+      display: "grid",
+      gridGap: spaceBetweenIcons,
+      gridAutoFlow: "column",
+      justifyContent: "center",
+      marginTop: 25,
+      marginBottom: 25,
+    },
     imgStyle: {
       width: 25,
       height: 25,
@@ -25,15 +32,7 @@ export default function Footer() {
   const classes = useLocalStyles();
 
   return (
-    <div
-      style={{
-        marginBottom: "25px",
-        display: "grid",
-        gridGap: spaceBetweenIcons,
-        gridAutoFlow: "column",
-        justifyContent: "center",
-      }}
-    >
+    <div className={classes.footer}>
       <a href="https://swap.holygrail.one" target="_blank" rel="noreferrer">
         <img src={swapIcon} className={classes.imgStyle} alt="Swap" />
       </a>

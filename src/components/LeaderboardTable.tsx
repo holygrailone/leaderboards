@@ -1,4 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, {
+  useState,
+  useEffect,
+  ChangeEventHandler,
+  MouseEvent,
+  Dispatch,
+  SetStateAction,
+  ChangeEvent,
+  ReactNode,
+} from "react";
 import axios from "axios";
 import {
   TableContainer,
@@ -15,14 +24,22 @@ import {
   IconButton,
   InputAdornment,
   TextField,
+  Theme,
+  useTheme,
+  Badge,
+  Typography,
 } from "@mui/material";
-import { makeStyles, createStyles, useTheme, styled } from "@mui/styles";
+import { makeStyles, createStyles } from "@mui/styles";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
-import goldMedal from "./assets/goldmedal.png";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import goldMedal from "../assets/goldmedal.png";
 import SearchIcon from "@mui/icons-material/Search";
+import FilterDialog from "./FilterDialog";
+import { useStore } from "store/Store";
+import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
-const tableHeaders = [
+type OrderType = "asc" | "desc";
+
+const tableHeaders: LegendLabelData[] = [
   { label: "Rank", id: "rank", numeric: true },
   { label: "Legend #", id: "legendid", numeric: true },
   { label: "Generation", id: "gen", numeric: true },
@@ -41,19 +58,23 @@ const tableHeaders = [
 const iconSize = 30;
 const tableCellPadding = 12;
 
-const useLocalStyles = makeStyles((theme) =>
+const useLocalStyles = makeStyles((theme: Theme) =>
   createStyles({
-    primaryColor: { color: theme.palette.primary.main },
     root: {
       width: "90vw",
       margin: "auto",
       textAlign: "center",
       color: "white",
-      backgroundColor: theme.palette.background.main,
+      backgroundColor: theme.palette.background.default,
+      marginTop: 0,
+      marginBottom: 0,
+      display: "grid",
+      gridTemplateRows: "max-content 1fr max-content",
+      alignItems: "start",
     },
     tableContainerPaper: {
       "&.MuiPaper-root": {
-        backgroundColor: theme.palette.background.main,
+        backgroundColor: theme.palette.background.default,
         borderRadius: 0,
       },
     },
@@ -63,14 +84,16 @@ const useLocalStyles = makeStyles((theme) =>
       verticalAlign: "middle",
     },
     tableHeader: {
-      padding: 30,
+      padding: theme.spacing(4),
       cursor: "pointer",
     },
     tableRow: {
       padding: 10,
     },
     footer: {
+      border: "none",
       padding: 12,
+      // transform: "translateY(-75%)",
     },
     paginationStyle: {
       "& .MuiPaginationItem-root.Mui-selected": {
@@ -89,42 +112,71 @@ const useLocalStyles = makeStyles((theme) =>
       borderWidth: 1,
       borderColor: theme.palette.primary.main,
     },
+    baseCellStyle: {
+      whiteSpace: "nowrap",
+      padding: tableCellPadding,
+    },
+    horizontalGrid: {
+      display: "grid",
+      gridAutoFlow: "column",
+      gridGap: theme.spacing(2),
+      alignItems: "center",
+    },
   })
 );
 
-const baseCellStyle = {
-  color: "white",
-  whiteSpace: "nowrap",
-  padding: tableCellPadding,
-};
-
-const StyledTableCell = (props) => {
+interface StyledTableCellProps {
+  rank?: boolean;
+  numeric?: boolean;
+  children: ReactNode;
+}
+const StyledTableCell = (props: StyledTableCellProps) => {
   const { rank, numeric } = props;
+  const classes = useLocalStyles();
 
   if (rank) {
     return (
-      <TableCell style={{ ...baseCellStyle, textAlign: "center" }}>
+      <TableCell
+        className={classes.baseCellStyle}
+        style={{ textAlign: "center" }}
+        sx={{ color: "white" }}
+      >
         {props.children}
       </TableCell>
     );
   }
   if (numeric) {
     return (
-      <TableCell style={{ ...baseCellStyle, textAlign: "end" }}>
+      <TableCell
+        className={classes.baseCellStyle}
+        style={{ textAlign: "end" }}
+        sx={{ color: "white" }}
+      >
         {props.children}
       </TableCell>
     );
   }
-  return <TableCell style={baseCellStyle}>{props.children}</TableCell>;
+  return (
+    <TableCell className={classes.baseCellStyle} sx={{ color: "white" }}>
+      {props.children}
+    </TableCell>
+  );
 };
 
-const SortableTableHead = (props) => {
+interface SortableTableHeadProps {
+  onRequestSort: (event: MouseEvent, property: keyof LegendData) => void;
+  order: OrderType;
+  orderBy: string;
+}
+const SortableTableHead = (props: SortableTableHeadProps) => {
   const classes = useLocalStyles();
   const theme = useTheme();
   const { order, orderBy, onRequestSort } = props;
-  const createSortHandler = (property) => (event) => {
-    onRequestSort(event, property);
-  };
+
+  const createSortHandler =
+    (property: keyof LegendData) => (event: MouseEvent) => {
+      onRequestSort(event, property);
+    };
 
   return (
     <TableHead className={classes.tableHeader}>
@@ -139,10 +191,11 @@ const SortableTableHead = (props) => {
               key={th.id}
               sortDirection={orderByHeader ? order : false}
               align={textAlignment}
+              className={classes.baseCellStyle}
               style={{
-                ...baseCellStyle,
                 fontWeight: 600,
                 fontSize: "1.1rem",
+                color: "white",
               }}
               onClick={createSortHandler(th.id)}
             >
@@ -173,73 +226,110 @@ const SortableTableHead = (props) => {
   );
 };
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-    "&:hover fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-  },
-}));
-
-const EnhancedTableToolbar = (props) => {
-  const { filterText, handleFilterTextChange } = props;
+interface EnhancedTableToolbarProps {
+  filterText: string;
+  handleFilterTextChange: ChangeEventHandler<HTMLTextAreaElement>;
+  handleOpenFilterMenu: () => void;
+  numRows: number;
+  numFiltersActive: number;
+}
+const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
+  const {
+    filterText,
+    handleFilterTextChange,
+    handleOpenFilterMenu,
+    numRows,
+    numFiltersActive,
+  } = props;
   const theme = useTheme();
   const classes = useLocalStyles();
 
   return (
     <Toolbar className={classes.toolbar}>
-      <Tooltip title="Search Name or Owner Address">
-        <StyledTextField
-          variant="outlined"
-          size="small"
-          value={filterText}
-          onChange={handleFilterTextChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon className={classes.primaryColor} />
-              </InputAdornment>
-            ),
-          }}
-          inputProps={{ style: { color: theme.palette.primary.main } }}
-        />
-      </Tooltip>
+      <div className={classes.horizontalGrid}>
+        <Tooltip title="Search Name or Owner Address">
+          <TextField
+            variant="outlined"
+            size="small"
+            value={filterText}
+            onChange={handleFilterTextChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: theme.palette.primary.main,
+                "& fieldset": {
+                  borderColor: theme.palette.primary.main,
+                },
+                "&:hover fieldset": {
+                  borderColor: theme.palette.primary.main,
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: theme.palette.primary.main,
+                },
+              },
+            }}
+          />
+        </Tooltip>
 
-      {/* FILTER WIP
+        <Typography variant="h6" color="primary">
+          {numRows} rows shown
+        </Typography>
+      </div>
+
       <Tooltip title="Filter">
-        <IconButton>
-          <FilterListIcon className={classes.primaryColor} />
+        <IconButton onClick={handleOpenFilterMenu}>
+          <Badge badgeContent={numFiltersActive} color="primary">
+            <FilterAltOutlinedIcon color="primary" fontSize="large" />
+          </Badge>
         </IconButton>
-      </Tooltip> */}
+      </Tooltip>
     </Toolbar>
   );
 };
 
-export default function LeaderboardTable(props) {
+interface LeaderboardTableProps {
+  setNumLegends: Dispatch<SetStateAction<number>>;
+}
+const LeaderboardTable = (props: LeaderboardTableProps) => {
   const { setNumLegends } = props;
   const classes = useLocalStyles();
+  const { dispatch } = useStore();
 
   // pagination
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
-  const handleChangePage = (_, newPage) => {
+  const handleChangePage = (_e: unknown, newPage: number) => {
     setPage(newPage);
   };
 
   // text filter
   const [filterText, setFilterText] = useState("");
-  const handleFilterTextChange = (e) => {
-    setFilterText(e.target.value);
+  const handleFilterTextChange = (e: ChangeEvent<{ value: unknown }>) => {
+    setFilterText(e.target.value as string);
   };
 
+  // filter dialog menu
+  const [filterDialogOpen, setFilterDialogOpen] = useState<boolean>(false);
+  const handleOpenFilterMenu = () => {
+    setFilterDialogOpen(true);
+  };
+  const handleCloseFilterMenu = () => {
+    setFilterDialogOpen(false);
+  };
+
+  // filter dialog props
+  const [uniqueLegendClassSelection, setUniqueLegendClassSelection] = useState<
+    FilterLegendClassSelection[]
+  >([]);
+
   // fetch legends data
-  const [legends, setLegends] = useState([]);
+  const [legends, setLegends] = useState<LegendData[]>([]);
   useEffect(() => {
     axios
       .get("https://api.holygrail.one/legends.json", {
@@ -249,14 +339,12 @@ export default function LeaderboardTable(props) {
         },
       })
       .then((res) => {
-        var newLegends = res.data
+        var newLegends = (res.data as LegendData[])
           .sort((a, b) => {
             // sort order: level / xp / mint number (legendid a.k.a time minted: earlier first)
             if (a.level === b.level) {
-              // xp only important when level are the same
-              // return a.xp > b.xp ? -1 : 1;
               if (a.xp === b.xp) {
-                return b.legendid - a.legendid;
+                return a.legendid - b.legendid;
               }
               return b.xp - a.xp;
             }
@@ -267,25 +355,43 @@ export default function LeaderboardTable(props) {
           });
         setLegends(newLegends);
         setNumLegends(newLegends.length);
+        dispatch({
+          type: "UPDATE_LEGENDS_DATA",
+          payload: {
+            legendsData: newLegends,
+          },
+        });
       });
-  }, [setNumLegends]);
+  }, [dispatch, setNumLegends]);
 
-  const filteredLegends = legends.filter(
-    (l) =>
-      l.name.toLowerCase().includes(filterText.toLowerCase()) ||
-      l.address.toLowerCase().includes(filterText.toLowerCase())
-  );
+  const filteredLegends = legends
+    .filter(
+      (l) =>
+        l.name.toLowerCase().includes(filterText.toLowerCase()) ||
+        l.address.toLowerCase().includes(filterText.toLowerCase())
+    )
+    .filter(
+      (l) =>
+        uniqueLegendClassSelection.every((u) => !u.selected) ||
+        uniqueLegendClassSelection
+          .filter((u) => u.selected)
+          .some((u) => u.filterName === l.class)
+    );
 
   // sorting
-  const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState(tableHeaders[0].id);
-  const handleRequestSort = (_, property) => {
+  const [order, setOrder] = useState<OrderType>("asc");
+  const [orderBy, setOrderBy] = useState<string>(tableHeaders[0].id);
+  const handleRequestSort = (_e: MouseEvent, property: keyof LegendData) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
-  const descendingComparator = (a, b, orderBy) => {
+  const descendingComparator = (
+    a: LegendData,
+    b: LegendData,
+    orderBy: string
+  ): number => {
     if (b[orderBy] < a[orderBy]) {
       return -1;
     }
@@ -295,10 +401,10 @@ export default function LeaderboardTable(props) {
     return 0;
   };
 
-  const getComparator = (order, orderBy) => {
+  const getComparator = (order: OrderType, orderBy: string) => {
     return order === "desc"
-      ? (a, b) => descendingComparator(a, b, orderBy)
-      : (a, b) => -descendingComparator(a, b, orderBy);
+      ? (a: LegendData, b: LegendData) => descendingComparator(a, b, orderBy)
+      : (a: LegendData, b: LegendData) => -descendingComparator(a, b, orderBy);
   };
 
   return (
@@ -306,6 +412,11 @@ export default function LeaderboardTable(props) {
       <EnhancedTableToolbar
         filterText={filterText}
         handleFilterTextChange={handleFilterTextChange}
+        handleOpenFilterMenu={handleOpenFilterMenu}
+        numRows={filteredLegends.length}
+        numFiltersActive={
+          uniqueLegendClassSelection.some((u) => u.selected) ? 1 : 0
+        }
       />
 
       <TableContainer component={Paper} className={classes.tableContainerPaper}>
@@ -344,7 +455,12 @@ export default function LeaderboardTable(props) {
 
                   <Tooltip title={legend.name} placement="right-start">
                     {/* not using StyledTableCell inside Tooltip bc of https://stackoverflow.com/questions/67627038/react-forward-ref-not-working-as-with-custom-compoent */}
-                    <TableCell style={{ ...baseCellStyle }}>
+                    <TableCell
+                      className={classes.baseCellStyle}
+                      sx={{
+                        color: "white",
+                      }}
+                    >
                       {`${legend.name.substring(0, 20)}${
                         legend.name.length > 20 ? "..." : ""
                       }`}
@@ -405,6 +521,16 @@ export default function LeaderboardTable(props) {
         showFirstButton
         showLastButton
       />
+
+      <FilterDialog
+        filterDialogOpen={filterDialogOpen}
+        onCloseFilterMenu={handleCloseFilterMenu}
+        legends={legends}
+        uniqueLegendClassSelection={uniqueLegendClassSelection}
+        setUniqueLegendClassSelection={setUniqueLegendClassSelection}
+      />
     </div>
   );
-}
+};
+
+export default LeaderboardTable;
