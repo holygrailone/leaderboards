@@ -26,14 +26,16 @@ import {
   TextField,
   Theme,
   useTheme,
+  Badge,
+  Typography,
 } from "@mui/material";
 import { makeStyles, createStyles } from "@mui/styles";
 import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import goldMedal from "../assets/goldmedal.png";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterDialog from "./FilterDialog";
 import { useStore } from "store/Store";
+import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
 type OrderType = "asc" | "desc";
 
@@ -58,7 +60,6 @@ const tableCellPadding = 12;
 
 const useLocalStyles = makeStyles((theme: Theme) =>
   createStyles({
-    primaryColor: { color: theme.palette.primary.main },
     root: {
       width: "90vw",
       margin: "auto",
@@ -83,7 +84,7 @@ const useLocalStyles = makeStyles((theme: Theme) =>
       verticalAlign: "middle",
     },
     tableHeader: {
-      padding: 30,
+      padding: theme.spacing(4),
       cursor: "pointer",
     },
     tableRow: {
@@ -114,6 +115,12 @@ const useLocalStyles = makeStyles((theme: Theme) =>
     baseCellStyle: {
       whiteSpace: "nowrap",
       padding: tableCellPadding,
+    },
+    horizontalGrid: {
+      display: "grid",
+      gridAutoFlow: "column",
+      gridGap: theme.spacing(2),
+      alignItems: "center",
     },
   })
 );
@@ -223,46 +230,63 @@ interface EnhancedTableToolbarProps {
   filterText: string;
   handleFilterTextChange: ChangeEventHandler<HTMLTextAreaElement>;
   handleOpenFilterMenu: () => void;
+  numRows: number;
+  numFiltersActive: number;
 }
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-  const { filterText, handleFilterTextChange, handleOpenFilterMenu } = props;
+  const {
+    filterText,
+    handleFilterTextChange,
+    handleOpenFilterMenu,
+    numRows,
+    numFiltersActive,
+  } = props;
   const theme = useTheme();
   const classes = useLocalStyles();
 
   return (
     <Toolbar className={classes.toolbar}>
-      <Tooltip title="Search Name or Owner Address">
-        <TextField
-          variant="outlined"
-          size="small"
-          value={filterText}
-          onChange={handleFilterTextChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon className={classes.primaryColor} />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": {
-                borderColor: theme.palette.primary.main,
+      <div className={classes.horizontalGrid}>
+        <Tooltip title="Search Name or Owner Address">
+          <TextField
+            variant="outlined"
+            size="small"
+            value={filterText}
+            onChange={handleFilterTextChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon color="primary" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                color: theme.palette.primary.main,
+                "& fieldset": {
+                  borderColor: theme.palette.primary.main,
+                },
+                "&:hover fieldset": {
+                  borderColor: theme.palette.primary.main,
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: theme.palette.primary.main,
+                },
               },
-              "&:hover fieldset": {
-                borderColor: theme.palette.primary.main,
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: theme.palette.primary.main,
-              },
-            },
-          }}
-        />
-      </Tooltip>
+            }}
+          />
+        </Tooltip>
+
+        <Typography variant="h6" color="primary">
+          {numRows} rows shown
+        </Typography>
+      </div>
 
       <Tooltip title="Filter">
         <IconButton onClick={handleOpenFilterMenu}>
-          <FilterListIcon className={classes.primaryColor} />
+          <Badge badgeContent={numFiltersActive} color="primary">
+            <FilterAltOutlinedIcon color="primary" fontSize="large" />
+          </Badge>
         </IconButton>
       </Tooltip>
     </Toolbar>
@@ -298,6 +322,11 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
   const handleCloseFilterMenu = () => {
     setFilterDialogOpen(false);
   };
+
+  // filter dialog props
+  const [uniqueLegendClassSelection, setUniqueLegendClassSelection] = useState<
+    FilterLegendClassSelection[]
+  >([]);
 
   // fetch legends data
   const [legends, setLegends] = useState<LegendData[]>([]);
@@ -335,11 +364,19 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
       });
   }, [dispatch, setNumLegends]);
 
-  const filteredLegends = legends.filter(
-    (l) =>
-      l.name.toLowerCase().includes(filterText.toLowerCase()) ||
-      l.address.toLowerCase().includes(filterText.toLowerCase())
-  );
+  const filteredLegends = legends
+    .filter(
+      (l) =>
+        l.name.toLowerCase().includes(filterText.toLowerCase()) ||
+        l.address.toLowerCase().includes(filterText.toLowerCase())
+    )
+    .filter(
+      (l) =>
+        uniqueLegendClassSelection.every((u) => !u.selected) ||
+        uniqueLegendClassSelection
+          .filter((u) => u.selected)
+          .some((u) => u.filterName === l.class)
+    );
 
   // sorting
   const [order, setOrder] = useState<OrderType>("asc");
@@ -376,6 +413,10 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
         filterText={filterText}
         handleFilterTextChange={handleFilterTextChange}
         handleOpenFilterMenu={handleOpenFilterMenu}
+        numRows={filteredLegends.length}
+        numFiltersActive={
+          uniqueLegendClassSelection.some((u) => u.selected) ? 1 : 0
+        }
       />
 
       <TableContainer component={Paper} className={classes.tableContainerPaper}>
@@ -484,6 +525,9 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
       <FilterDialog
         filterDialogOpen={filterDialogOpen}
         onCloseFilterMenu={handleCloseFilterMenu}
+        legends={legends}
+        uniqueLegendClassSelection={uniqueLegendClassSelection}
+        setUniqueLegendClassSelection={setUniqueLegendClassSelection}
       />
     </div>
   );

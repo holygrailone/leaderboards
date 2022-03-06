@@ -10,6 +10,7 @@ const AppTheme = createTheme({
     },
     tonalOffset: 0.5,
   },
+  spacing: 8,
 });
 
 export default AppTheme;

@@ -21,3 +21,8 @@ interface LegendLabelData {
   id: keyof LegendData;
   numeric: boolean;
 }
+
+interface FilterLegendClassSelection {
+  filterName: LegendClass;
+  selected: boolean;
+}
