@@ -6,7 +6,7 @@ import AppTheme from "./Theme";
 import clsx from "clsx";
 import { ThemeProvider } from "@mui/material/styles";
 import { makeStyles, createStyles } from "@mui/styles";
-import { StoreProvider } from "store/Store";
+import { StoreProvider } from "context/Store";
 
 const useLocalStyles = makeStyles(() =>
   createStyles({

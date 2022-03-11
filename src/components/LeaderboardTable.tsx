@@ -34,7 +34,7 @@ import Jazzicon, { jsNumberForAddress } from "react-jazzicon";
 import goldMedal from "../assets/goldmedal.png";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterDialog from "./FilterDialog";
-import { useStore } from "store/Store";
+import { useStore } from "context/Store";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 
 type OrderType = "asc" | "desc";
@@ -278,7 +278,7 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
         </Tooltip>
 
         <Typography variant="h6" color="primary">
-          {numRows} rows shown
+          {numRows} legends shown
         </Typography>
       </div>
 
