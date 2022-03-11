@@ -367,10 +367,14 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
     )
     .filter(
       (l) =>
-        state.uniqueLegendClassSelection.every((u) => !u.selected) ||
-        state.uniqueLegendClassSelection
-          .filter((u) => u.selected)
-          .some((u) => u.filterName === l.class)
+        (state.uniqueGenSelection.every((u) => !u.selected) ||
+          state.uniqueGenSelection
+            .filter((u) => u.selected)
+            .some((u) => u.filterName === l.gen)) &&
+        (state.uniqueLegendClassSelection.every((u) => !u.selected) ||
+          state.uniqueLegendClassSelection
+            .filter((u) => u.selected)
+            .some((u) => u.filterName === l.class))
     );
 
   // sorting

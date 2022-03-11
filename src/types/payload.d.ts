@@ -1,4 +1,5 @@
 type Payload = {
   legendsData?: LegendData[];
-  uniqueLegendClassSelection?: FilterLegendClassSelection[];
+  uniqueGenSelection?: FilterLegendProps[];
+  uniqueLegendClassSelection?: FilterLegendProps[];
 };

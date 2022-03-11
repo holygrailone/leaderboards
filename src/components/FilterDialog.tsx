@@ -25,6 +25,7 @@ const useLocalStyles = makeStyles((theme: Theme) =>
       display: "grid",
       gridAutoFlow: "column",
       gridGap: theme.spacing(2),
+      width: "fit-content",
     },
     filterTitle: {
       textAlign: "start",
@@ -48,16 +49,41 @@ const FilterDialog = (props: FilterDialogProps) => {
   const classes = useLocalStyles();
   const { state, dispatch } = useStore();
 
+  // gen filters
+  const [uniqueGenSelection, setUniqueGenSelection] = useState<
+    FilterLegendProps[]
+  >([]);
+
+  const resetGenFilter = useCallback(() => {
+    setUniqueGenSelection(
+      Array.from([...new Set(state.legendsData.map((l) => l.gen))]).map((c) => {
+        const filter: FilterLegendProps = {
+          filterName: c,
+          selected: false,
+        };
+        return filter;
+      })
+    );
+  }, [state.legendsData]);
+
+  const handleClickGenFilter = (idx: number) => {
+    setUniqueGenSelection(
+      uniqueGenSelection.map((u, i) =>
+        i === idx ? { ...u, selected: !u.selected } : u
+      )
+    );
+  };
+
   // class filters
   const [uniqueLegendClassSelection, setUniqueLegendClassSelection] = useState<
-    FilterLegendClassSelection[]
+    FilterLegendProps[]
   >([]);
 
   const resetClassFilter = useCallback(() => {
     setUniqueLegendClassSelection(
       Array.from([...new Set(state.legendsData.map((l) => l.class))]).map(
         (c) => {
-          const filter: FilterLegendClassSelection = {
+          const filter: FilterLegendProps = {
             filterName: c,
             selected: false,
           };
@@ -67,10 +93,6 @@ const FilterDialog = (props: FilterDialogProps) => {
     );
   }, [state.legendsData]);
 
-  useEffect(() => {
-    resetClassFilter();
-  }, [resetClassFilter, setUniqueLegendClassSelection, state.legendsData]);
-
   const handleClickClassFilter = (idx: number) => {
     setUniqueLegendClassSelection(
       uniqueLegendClassSelection.map((u, i) =>
@@ -79,14 +101,22 @@ const FilterDialog = (props: FilterDialogProps) => {
     );
   };
 
-  const onClearAllFilters = () => {
+  // handle all filters
+  // set all filters on load
+  const resetAllFilters = useCallback(() => {
+    resetGenFilter();
     resetClassFilter();
-  };
+  }, [resetClassFilter, resetGenFilter]);
+
+  useEffect(() => {
+    resetAllFilters();
+  }, [resetAllFilters, resetClassFilter, resetGenFilter]);
 
   const onConfirm = () => {
     dispatch({
-      type: "UPDATE_CLASS_FILTERS",
+      type: "UPDATE_LEGENDS_FILTERS",
       payload: {
+        uniqueGenSelection: uniqueGenSelection,
         uniqueLegendClassSelection: uniqueLegendClassSelection,
       },
     });
@@ -111,6 +141,28 @@ const FilterDialog = (props: FilterDialogProps) => {
 
       <DialogContent className={classes.borderBottom}>
         <DialogContentText className={classes.dialogContentGrid}>
+          <div>
+            <Typography
+              variant="h6"
+              className={classes.filterTitle}
+              color="primary"
+            >
+              Gen
+            </Typography>
+
+            <div className={classes.filterButtonGrid}>
+              {uniqueGenSelection.map((c, idx) => (
+                <Button
+                  variant={c.selected ? "contained" : "outlined"}
+                  color="primary"
+                  onClick={() => handleClickGenFilter(idx)}
+                >
+                  {c.filterName}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           <div>
             <Typography
               variant="h6"
@@ -146,7 +198,7 @@ const FilterDialog = (props: FilterDialogProps) => {
       <Divider />
 
       <DialogActions className={classes.dialogActions}>
-        <Button onClick={onClearAllFilters}>Clear All Filters</Button>
+        <Button onClick={resetAllFilters}>Clear All Filters</Button>
         <Button onClick={onConfirm}>Confirm</Button>
       </DialogActions>
     </Dialog>

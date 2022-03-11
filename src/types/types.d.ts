@@ -22,7 +22,7 @@ interface LegendLabelData {
   numeric: boolean;
 }
 
-interface FilterLegendClassSelection {
-  filterName: LegendClass;
+interface FilterLegendProps {
+  filterName: LegendClass | number;
   selected: boolean;
 }
