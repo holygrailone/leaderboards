@@ -5,14 +5,19 @@ import React, {
   useContext,
   useReducer,
 } from "react";
-import { updateLegendsDataReducer } from "./reducers";
+import {
+  updateLegendsDataReducer,
+  updateUniqueLegendClassSelectionReducer,
+} from "./reducers";
 
 const initialState: State = {
   legendsData: [] as LegendData[],
+  uniqueLegendClassSelection: [] as FilterLegendClassSelection[],
 };
 
 const allReducers: Record<Action["type"], Reducer> = {
   UPDATE_LEGENDS_DATA: updateLegendsDataReducer,
+  UPDATE_CLASS_FILTERS: updateUniqueLegendClassSelectionReducer,
 };
 
 const reducers: Reducer = (state: State, action: Action) => {

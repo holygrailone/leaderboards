@@ -299,7 +299,7 @@ interface LeaderboardTableProps {
 const LeaderboardTable = (props: LeaderboardTableProps) => {
   const { setNumLegends } = props;
   const classes = useLocalStyles();
-  const { dispatch } = useStore();
+  const { state, dispatch } = useStore();
 
   // pagination
   const [page, setPage] = useState(1);
@@ -322,11 +322,6 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
   const handleCloseFilterMenu = () => {
     setFilterDialogOpen(false);
   };
-
-  // filter dialog props
-  const [uniqueLegendClassSelection, setUniqueLegendClassSelection] = useState<
-    FilterLegendClassSelection[]
-  >([]);
 
   // fetch legends data
   const [legends, setLegends] = useState<LegendData[]>([]);
@@ -372,8 +367,8 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
     )
     .filter(
       (l) =>
-        uniqueLegendClassSelection.every((u) => !u.selected) ||
-        uniqueLegendClassSelection
+        state.uniqueLegendClassSelection.every((u) => !u.selected) ||
+        state.uniqueLegendClassSelection
           .filter((u) => u.selected)
           .some((u) => u.filterName === l.class)
     );
@@ -415,7 +410,7 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
         handleOpenFilterMenu={handleOpenFilterMenu}
         numRows={filteredLegends.length}
         numFiltersActive={
-          uniqueLegendClassSelection.some((u) => u.selected) ? 1 : 0
+          state.uniqueLegendClassSelection.some((u) => u.selected) ? 1 : 0
         }
       />
 
@@ -525,9 +520,6 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
       <FilterDialog
         filterDialogOpen={filterDialogOpen}
         onCloseFilterMenu={handleCloseFilterMenu}
-        legends={legends}
-        uniqueLegendClassSelection={uniqueLegendClassSelection}
-        setUniqueLegendClassSelection={setUniqueLegendClassSelection}
       />
     </div>
   );
