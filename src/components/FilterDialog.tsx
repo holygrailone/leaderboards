@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogContentText,
   Divider,
+  Grid,
   Theme,
   Typography,
   useTheme,
@@ -15,17 +16,10 @@ import { useStore } from "context/Store";
 
 const useLocalStyles = makeStyles((theme: Theme) =>
   createStyles({
-    borderBottom: { borderBottom: "1px solid" },
     dialogContentGrid: {
       display: "grid",
       gridAutoFlow: "row",
       gridGap: theme.spacing(2),
-    },
-    filterButtonGrid: {
-      display: "grid",
-      gridAutoFlow: "column",
-      gridGap: theme.spacing(2),
-      width: "fit-content",
     },
     filterTitle: {
       textAlign: "start",
@@ -36,6 +30,7 @@ const useLocalStyles = makeStyles((theme: Theme) =>
       display: "grid",
       gridGap: theme.spacing(1),
     },
+    divider: { background: "white", width: "100%" },
   })
 );
 
@@ -50,25 +45,54 @@ const FilterDialog = (props: FilterDialogProps) => {
   const { state, dispatch } = useStore();
 
   // gen filters
-  const [uniqueGenSelection, setUniqueGenSelection] = useState<
+  const [uniqueLegendGenSelection, setUniqueGenSelection] = useState<
     FilterLegendProps[]
   >([]);
 
   const resetGenFilter = useCallback(() => {
     setUniqueGenSelection(
-      Array.from([...new Set(state.legendsData.map((l) => l.gen))]).map((c) => {
-        const filter: FilterLegendProps = {
-          filterName: c,
-          selected: false,
-        };
-        return filter;
-      })
+      Array.from([...new Set(state.legendsData.map((l) => l.gen))])
+        .sort()
+        .map((c) => {
+          const filter: FilterLegendProps = {
+            filterName: c,
+            selected: false,
+          };
+          return filter;
+        })
     );
   }, [state.legendsData]);
 
   const handleClickGenFilter = (idx: number) => {
     setUniqueGenSelection(
-      uniqueGenSelection.map((u, i) =>
+      uniqueLegendGenSelection.map((u, i) =>
+        i === idx ? { ...u, selected: !u.selected } : u
+      )
+    );
+  };
+
+  // title filters
+  const [uniqueLegendTitleSelection, setUniqueLegendTitleSelection] = useState<
+    FilterLegendProps[]
+  >([]);
+
+  const resetTitleFilter = useCallback(() => {
+    setUniqueLegendTitleSelection(
+      Array.from([...new Set(state.legendsData.map((l) => l.title))])
+        .sort()
+        .map((c) => {
+          const filter: FilterLegendProps = {
+            filterName: c,
+            selected: false,
+          };
+          return filter;
+        })
+    );
+  }, [state.legendsData]);
+
+  const handleClickTitleFilter = (idx: number) => {
+    setUniqueLegendTitleSelection(
+      uniqueLegendTitleSelection.map((u, i) =>
         i === idx ? { ...u, selected: !u.selected } : u
       )
     );
@@ -81,15 +105,15 @@ const FilterDialog = (props: FilterDialogProps) => {
 
   const resetClassFilter = useCallback(() => {
     setUniqueLegendClassSelection(
-      Array.from([...new Set(state.legendsData.map((l) => l.class))]).map(
-        (c) => {
+      Array.from([...new Set(state.legendsData.map((l) => l.class))])
+        .sort()
+        .map((c) => {
           const filter: FilterLegendProps = {
             filterName: c,
             selected: false,
           };
           return filter;
-        }
-      )
+        })
     );
   }, [state.legendsData]);
 
@@ -105,8 +129,9 @@ const FilterDialog = (props: FilterDialogProps) => {
   // set all filters on load
   const resetAllFilters = useCallback(() => {
     resetGenFilter();
+    resetTitleFilter();
     resetClassFilter();
-  }, [resetClassFilter, resetGenFilter]);
+  }, [resetClassFilter, resetGenFilter, resetTitleFilter]);
 
   useEffect(() => {
     resetAllFilters();
@@ -116,7 +141,8 @@ const FilterDialog = (props: FilterDialogProps) => {
     dispatch({
       type: "UPDATE_LEGENDS_FILTERS",
       payload: {
-        uniqueGenSelection: uniqueGenSelection,
+        uniqueLegendGenSelection: uniqueLegendGenSelection,
+        uniqueLegendTitleSelection: uniqueLegendTitleSelection,
         uniqueLegendClassSelection: uniqueLegendClassSelection,
       },
     });
@@ -127,6 +153,7 @@ const FilterDialog = (props: FilterDialogProps) => {
     <Dialog
       open={filterDialogOpen}
       onClose={onCloseFilterMenu}
+      maxWidth="md"
       PaperProps={{
         style: {
           textAlign: "center",
@@ -139,7 +166,7 @@ const FilterDialog = (props: FilterDialogProps) => {
     >
       {/* <DialogTitle>Filters coming soon!</DialogTitle> */}
 
-      <DialogContent className={classes.borderBottom}>
+      <DialogContent>
         <DialogContentText className={classes.dialogContentGrid}>
           <div>
             <Typography
@@ -150,17 +177,43 @@ const FilterDialog = (props: FilterDialogProps) => {
               Gen
             </Typography>
 
-            <div className={classes.filterButtonGrid}>
-              {uniqueGenSelection.map((c, idx) => (
-                <Button
-                  variant={c.selected ? "contained" : "outlined"}
-                  color="primary"
-                  onClick={() => handleClickGenFilter(idx)}
-                >
-                  {c.filterName}
-                </Button>
+            <Grid container spacing={1} justifyContent="flex-start">
+              {uniqueLegendGenSelection.map((c, idx) => (
+                <Grid item>
+                  <Button
+                    variant={c.selected ? "contained" : "outlined"}
+                    color="primary"
+                    onClick={() => handleClickGenFilter(idx)}
+                  >
+                    {c.filterName}
+                  </Button>
+                </Grid>
               ))}
-            </div>
+            </Grid>
+          </div>
+
+          <div>
+            <Typography
+              variant="h6"
+              className={classes.filterTitle}
+              color="primary"
+            >
+              Title
+            </Typography>
+
+            <Grid container spacing={1} justifyContent="flex-start">
+              {uniqueLegendTitleSelection.map((c, idx) => (
+                <Grid item>
+                  <Button
+                    variant={c.selected ? "contained" : "outlined"}
+                    color="primary"
+                    onClick={() => handleClickTitleFilter(idx)}
+                  >
+                    {c.filterName}
+                  </Button>
+                </Grid>
+              ))}
+            </Grid>
           </div>
 
           <div>
@@ -172,30 +225,32 @@ const FilterDialog = (props: FilterDialogProps) => {
               Class
             </Typography>
 
-            <div className={classes.filterButtonGrid}>
+            <Grid container spacing={1} justifyContent="flex-start">
               {uniqueLegendClassSelection.map((c, idx) => (
-                <Button
-                  variant={c.selected ? "contained" : "outlined"}
-                  color="primary"
-                  onClick={() => handleClickClassFilter(idx)}
-                >
-                  {c.filterName}
-                </Button>
+                <Grid item>
+                  <Button
+                    variant={c.selected ? "contained" : "outlined"}
+                    color="primary"
+                    onClick={() => handleClickClassFilter(idx)}
+                  >
+                    {c.filterName}
+                  </Button>
+                </Grid>
               ))}
-            </div>
+            </Grid>
           </div>
 
-          <Typography
+          {/* <Typography
             variant="h6"
             className={classes.filterTitle}
             color="common.white"
           >
             More filters coming soon!
-          </Typography>
+          </Typography> */}
         </DialogContentText>
       </DialogContent>
 
-      <Divider />
+      <Divider className={classes.divider} />
 
       <DialogActions className={classes.dialogActions}>
         <Button onClick={resetAllFilters}>Clear All Filters</Button>

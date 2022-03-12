@@ -10,7 +10,8 @@ import { updateLegendsDataReducer } from "./reducers/legendsReducers";
 
 const initialState: State = {
   legendsData: [] as LegendData[],
-  uniqueGenSelection: [] as FilterLegendProps[],
+  uniqueLegendGenSelection: [] as FilterLegendProps[],
+  uniqueLegendTitleSelection: [] as FilterLegendProps[],
   uniqueLegendClassSelection: [] as FilterLegendProps[],
 };
 

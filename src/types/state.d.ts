@@ -1,5 +1,6 @@
 type State = {
   legendsData: LegendData[];
-  uniqueGenSelection: FilterLegendProps[];
+  uniqueLegendGenSelection: FilterLegendProps[];
+  uniqueLegendTitleSelection: FilterLegendProps[];
   uniqueLegendClassSelection: FilterLegendProps[];
 };

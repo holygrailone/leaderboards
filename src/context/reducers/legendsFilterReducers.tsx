@@ -1,14 +1,27 @@
 export const updateLegendFiltersReducer = (state: State, action: Action) => {
+  // gen
   if (
-    action.payload.uniqueGenSelection &&
-    action.payload.uniqueGenSelection.length > 0
+    action.payload.uniqueLegendGenSelection &&
+    action.payload.uniqueLegendGenSelection.length > 0
   ) {
     state = {
       ...state,
-      uniqueGenSelection: action.payload.uniqueGenSelection,
+      uniqueLegendGenSelection: action.payload.uniqueLegendGenSelection,
     };
   }
 
+  // title
+  if (
+    action.payload.uniqueLegendTitleSelection &&
+    action.payload.uniqueLegendTitleSelection.length > 0
+  ) {
+    state = {
+      ...state,
+      uniqueLegendTitleSelection: action.payload.uniqueLegendTitleSelection,
+    };
+  }
+
+  // class
   if (
     action.payload.uniqueLegendClassSelection &&
     action.payload.uniqueLegendClassSelection.length > 0

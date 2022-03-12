@@ -367,10 +367,14 @@ const LeaderboardTable = (props: LeaderboardTableProps) => {
     )
     .filter(
       (l) =>
-        (state.uniqueGenSelection.every((u) => !u.selected) ||
-          state.uniqueGenSelection
+        (state.uniqueLegendGenSelection.every((u) => !u.selected) ||
+          state.uniqueLegendGenSelection
             .filter((u) => u.selected)
             .some((u) => u.filterName === l.gen)) &&
+        (state.uniqueLegendTitleSelection.every((u) => !u.selected) ||
+          state.uniqueLegendTitleSelection
+            .filter((u) => u.selected)
+            .some((u) => u.filterName === l.title)) &&
         (state.uniqueLegendClassSelection.every((u) => !u.selected) ||
           state.uniqueLegendClassSelection
             .filter((u) => u.selected)

@@ -23,6 +23,6 @@ interface LegendLabelData {
 }
 
 interface FilterLegendProps {
-  filterName: LegendClass | number;
+  filterName: LegendClass | string | number;
   selected: boolean;
 }
