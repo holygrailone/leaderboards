@@ -1,3 +1,0 @@
-type Payload = {
-  legendsData?: LegendData[];
-};

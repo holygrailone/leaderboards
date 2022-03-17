@@ -1,3 +1,0 @@
-type State = {
-  legendsData: LegendData[];
-};
